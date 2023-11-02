@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type CreateServiceTokenRequest struct {
 	ApplicationID string `json:"ApplicationID"`
 	Username      string `json:"Username"`
@@ -9,6 +7,7 @@ type CreateServiceTokenRequest struct {
 }
 
 type CreateServiceTokenResponse struct {
-	Token      string    `json:"Token"`
-	Expiration time.Time `json:"Expiration"`
+	Token string `json:"Token"`
+	AppID string `json:"AppId"`
+	Info  string `json:"Info"`
 }
