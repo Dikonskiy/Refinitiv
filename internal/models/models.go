@@ -1,9 +1,11 @@
 package models
 
 type CreateServiceTokenRequest struct {
-	ApplicationID string `json:"ApplicationID"`
-	Username      string `json:"Username"`
-	Password      string `json:"Password"`
+	CreateServiceTokenRequest1 struct {
+		ApplicationID string `json:"ApplicationID"`
+		Username      string `json:"Username"`
+		Password      string `json:"Password"`
+	} `json:"CreateServiceToken_Request_1"`
 }
 
 type CreateServiceTokenResponse struct {
