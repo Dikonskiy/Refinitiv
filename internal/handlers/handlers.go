@@ -37,9 +37,13 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	response := models.CreateServiceTokenResponse{
-		Token: token,
-		AppID: "YourAppId",
-		Info:  "Token created successfully",
+		CreateServiceTokenResponse1: struct {
+			Expiration string `json:"Expiration"`
+			Token      string `json:"Token"`
+		}{
+			Token:      token,
+			Expiration: jwt.ErrTokenExpired.Error(),
+		},
 	}
 
 	w.Header().Set("Content-Type", "application/json")

@@ -9,7 +9,8 @@ type CreateServiceTokenRequest struct {
 }
 
 type CreateServiceTokenResponse struct {
-	Token string `json:"Token"`
-	AppID string `json:"AppId"`
-	Info  string `json:"Info"`
+	CreateServiceTokenResponse1 struct {
+		Expiration string `json:"Expiration"`
+		Token      string `json:"Token"`
+	} `json:"CreateServiceToken_Response_1"`
 }
