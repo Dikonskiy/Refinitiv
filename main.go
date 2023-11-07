@@ -5,12 +5,14 @@ import (
 	"Refinitiv/internal/config"
 	"Refinitiv/internal/handlers"
 	"Refinitiv/internal/models"
+	"Refinitiv/internal/repository"
 	"fmt"
 
 	"github.com/gorilla/mux"
 )
 
 var (
+	Repo *repository.Repository
 	Cnfg *models.Config
 	Hand *handlers.Handlers
 	App  *app.Application
@@ -24,7 +26,8 @@ func init() {
 		return
 	}
 
-	Hand = handlers.NewHandlers()
+	Repo = repository.NewRepository()
+	Hand = handlers.NewHandlers(Repo)
 	App = app.NewApplication()
 }
 
