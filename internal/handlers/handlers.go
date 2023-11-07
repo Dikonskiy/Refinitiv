@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type Handlers struct {
@@ -28,15 +26,15 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if !h.Repo.IsValidCredentials(request.CreateServiceTokenRequest1.ApplicationID, request.CreateServiceTokenRequest1.Username, request.CreateServiceTokenRequest1.Password) {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+	token, err := h.Repo.GenerateJWTToken(request.CreateServiceTokenRequest1.Username, request.CreateServiceTokenRequest1.ApplicationID)
+	if err != nil {
+		http.Error(w, "Failed to generate/get token", http.StatusBadRequest)
 		return
 	}
 
-	token, err := h.Repo.GenerateJWTToken(request.CreateServiceTokenRequest1.Username)
+	expiration, err := h.Repo.GetTokenExpiration(token)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusBadRequest)
-		return
+		http.Error(w, "Failed to get expiration", http.StatusBadRequest)
 	}
 
 	response := models.CreateServiceTokenResponse{
@@ -45,7 +43,7 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 			Token      string `json:"Token"`
 		}{
 			Token:      token,
-			Expiration: jwt.ErrTokenExpired.Error(),
+			Expiration: expiration,
 		},
 	}
 
