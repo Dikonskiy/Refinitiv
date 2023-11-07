@@ -32,6 +32,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/TokenManagement/TokenManagement.svc/REST/Anonymous/TokenManagement_1/CreateServiceToken_1", Hand.CreateServiceTokenHandler)
+	r.HandleFunc("/api/TokenManagement/TokenManagement.svc/REST/Anonymous/TokenManagement_1/ValidateServiceToken_1", Hand.ValidateServiceTokenHandler)
 
 	App.StartServer(r, Cnfg)
 
