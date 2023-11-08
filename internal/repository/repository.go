@@ -39,6 +39,7 @@ func (r *Repository) GenerateJWTToken(username, applicationID string) (string, e
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
 	claims["exp"] = time.Now().Add(90 * time.Minute).Unix()
+	claims["appid"] = applicationID
 
 	tokenString, err := token.SignedString([]byte("your-secret-key"))
 
@@ -84,15 +85,18 @@ func (r *Repository) ValidateJWTToken(applicationID, token string) (bool, string
 	}
 
 	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
-		username, usernameOk := claims["username"].(string)
-		expiration, expOk := claims["exp"].(float64)
-
-		if !usernameOk || !expOk {
-			fmt.Println("Missing claims in the token")
+		appID, appIDOk := claims["appid"].(string)
+		if !appIDOk || appID != applicationID {
+			fmt.Println("AppID does not match")
 			return false, ""
 		}
 
-		fmt.Printf("Username: %s\n", username)
+		expiration, expOk := claims["exp"].(float64)
+		if !expOk {
+			fmt.Println("Missing 'exp' claim in the token")
+			return false, ""
+		}
+
 		fmt.Printf("Expiration: %f\n", expiration)
 
 		expirationTime := time.Unix(int64(expiration), 0)
