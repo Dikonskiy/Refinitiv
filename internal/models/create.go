@@ -14,3 +14,17 @@ type CreateServiceTokenResponse struct {
 		Token      string `json:"Token"`
 	} `json:"CreateServiceToken_Response_1"`
 }
+
+type CreateImpersonationTokenRequest struct {
+	EffectiveUsername struct {
+		UserType string `json:"userType"`
+		Value    string `json:"Value"`
+	} `json:"CreateImpersonationToken_Request_1"`
+}
+
+type CreateImpersonationTokenResponse struct {
+	CreateImpersonationTokenResponse1 struct {
+		Expiration string `json:"Expiration"`
+		Token      string `json:"Token"`
+	} `json:"CreateImpersonationToken_Response_1"`
+}
