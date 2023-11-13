@@ -142,3 +142,7 @@ func (r *Repository) GenerateImpersonationToken(usertype, value string) (string,
 
 	return tokenString, nil
 }
+
+func (r *Repository) GenerateServiceAndImpersonationToken(applicationID, token, usertype, value string) {
+
+}
