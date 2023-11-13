@@ -6,9 +6,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type Handlers struct {
@@ -113,19 +110,20 @@ func (h *Handlers) CreateImpersonationTokenHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// Your logic to verify the request and extract information
-	// ...
-
-	// Generate JWT token
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["userType"] = request.EffectiveUsername.UserType
-	claims["Value"] = request.EffectiveUsername.Value
-	claims["exp"] = time.Now().Add(90 * time.Minute).Format(time.RFC3339)
-
-	tokenString, err := token.SignedString([]byte("your-secret-key"))
+	token, err := h.Repo.GenerateImpersonationToken(request.EffectiveUsername.UserType, request.EffectiveUsername.Value)
 	if err != nil {
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
+		return
+	}
+
+	expiration, err := h.Repo.GetTokenExpiration(token)
+	if err != nil {
+		http.Error(w, "Failed to get expiration: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if expiration == "" {
+		http.Error(w, "Expiration not available", http.StatusBadRequest)
 		return
 	}
 
@@ -133,7 +131,10 @@ func (h *Handlers) CreateImpersonationTokenHandler(w http.ResponseWriter, r *htt
 		CreateImpersonationTokenResponse1: struct {
 			Expiration string `json:"Expiration"`
 			Token      string `json:"Token"`
-		}{Expiration: claims["exp"].(string), Token: tokenString},
+		}{
+			Expiration: expiration,
+			Token:      token,
+		},
 	}
 
 	w.Header().Set("Content-Type", "application/json")

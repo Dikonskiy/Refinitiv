@@ -107,3 +107,38 @@ func (r *Repository) ValidateJWTToken(applicationID, token string) (bool, string
 	fmt.Println("Token is not valid or claims do not match")
 	return false, ""
 }
+
+func (r *Repository) GenerateImpersonationToken(usertype, value string) (string, error) {
+	if userTokens, ok := r.UserTokens[usertype]; ok {
+		if existingToken, ok := userTokens[value]; ok {
+			expiration, err := r.GetTokenExpiration(existingToken)
+			if err != nil {
+				return "", err
+			}
+
+			expirationTime, _ := time.Parse(time.RFC3339, expiration)
+			if time.Now().Before(expirationTime) {
+				return existingToken, nil
+			}
+		}
+	} else {
+		r.UserTokens[usertype] = make(map[string]string)
+	}
+
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["userType"] = usertype
+	claims["Value"] = value
+	claims["exp"] = time.Now().Add(90 * time.Minute).Unix()
+
+	tokenString, err := token.SignedString([]byte("your-secret-key"))
+
+	if err != nil {
+		return "", err
+	}
+
+	r.UserTokens[usertype][value] = tokenString
+
+	return tokenString, nil
+}
