@@ -1,17 +1,5 @@
 package models
 
-type CreateTokenRequests struct {
-	CreateServiceTokenRequest
-	CreateImpersonationTokenRequest
-	CreateImpersonationTokenRequest2
-}
-
-type CreateTokenResponse struct {
-	CreateServiceTokenResponse
-	CreateImpersonationTokenResponse
-	CreateImpersonationTokenResponse2
-}
-
 type CreateServiceTokenRequest struct {
 	CreateServiceTokenRequest1 struct {
 		ApplicationID string `json:"ApplicationID"`
@@ -54,8 +42,22 @@ type CreateImpersonationTokenRequest2 struct {
 }
 
 type CreateImpersonationTokenResponse2 struct {
-	CreateImpersonationTokenResponse1 struct {
+	CreateImpersonationTokenResponse2 struct {
 		Expiration string `json:"Expiration"`
 		Token      string `json:"Token"`
 	} `json:"CreateImpersonationToken_Response_2"`
+}
+
+type CreateImpersonationTokenRequest3 struct {
+	CreateImpersonationTokenRequest3 struct {
+		ApplicationID string `json:"ApplicationID"`
+		Token         string `json:"Token"`
+	} `json:"CreateImpersonationToken_Request_3"`
+}
+
+type CreateImpersonationTokenResponse3 struct {
+	CreateImpersonationTokenResponse3 struct {
+		Expiration string `json:"Expiration"`
+		Token      string `json:"Token"`
+	} `json:"CreateImpersonationToken_Response_3"`
 }

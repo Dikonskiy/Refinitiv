@@ -143,6 +143,50 @@ func (r *Repository) GenerateImpersonationToken(usertype, value string) (string,
 	return tokenString, nil
 }
 
-func (r *Repository) GenerateServiceAndImpersonationToken(applicationID, token, usertype, value string) {
+func (r *Repository) GenerateServiceAndImpersonationToken(applicationID, username, usertype, value string) (string, error) {
+	if userTokens, ok := r.UserTokens[applicationID]; ok {
+		if existingToken, ok := userTokens[username]; ok {
+			expiration, err := r.GetTokenExpiration(existingToken)
+			if err != nil {
+				return "", err
+			}
 
+			expirationTime, _ := time.Parse(time.RFC3339, expiration)
+			if time.Now().Before(expirationTime) {
+				return existingToken, nil
+			}
+		}
+	} else if userTokens, ok := r.UserTokens[usertype]; ok {
+		if existingToken, ok := userTokens[value]; ok {
+			expiration, err := r.GetTokenExpiration(existingToken)
+			if err != nil {
+				return "", err
+			}
+
+			expirationTime, _ := time.Parse(time.RFC3339, expiration)
+			if time.Now().Before(expirationTime) {
+				return existingToken, nil
+			}
+		}
+	} else {
+		r.UserTokens[applicationID] = make(map[string]string)
+	}
+
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["username"] = username
+	claims["appid"] = applicationID
+	claims["userType"] = usertype
+	claims["Value"] = value
+	claims["exp"] = time.Now().Add(90 * time.Minute).Unix()
+
+	tokenString, err := token.SignedString([]byte("your-secret-key"))
+	if err != nil {
+		return "", err
+	}
+
+	r.UserTokens[applicationID][username] = tokenString
+
+	return tokenString, nil
 }

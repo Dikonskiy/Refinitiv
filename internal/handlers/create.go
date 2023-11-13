@@ -82,3 +82,42 @@ func (h *Handlers) CreateImpersonationTokenHandler(w http.ResponseWriter, r *htt
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
+func (h *Handlers) GenerateServiceAndImpersonationToken(w http.ResponseWriter, r *http.Request) {
+	var request models.CreateImpersonationTokenRequest2
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.Repo.GenerateServiceAndImpersonationToken(request.CreateImpersonationTokenRequest2.ApplicationID, request.CreateImpersonationTokenRequest2.Username, request.CreateImpersonationTokenRequest2.EffectiveUsername.UserType, request.CreateImpersonationTokenRequest2.EffectiveUsername.Value)
+	if err != nil {
+		http.Error(w, "Error generating token: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	expiration, err := h.Repo.GetTokenExpiration(token)
+	if err != nil {
+		http.Error(w, "Failed to get expiration: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if expiration == "" {
+		http.Error(w, "Expiration not available", http.StatusBadRequest)
+		return
+	}
+
+	response := models.CreateImpersonationTokenResponse2{
+		CreateImpersonationTokenResponse2: struct {
+			Expiration string `json:"Expiration"`
+			Token      string `json:"Token"`
+		}{
+			Expiration: expiration,
+			Token:      token,
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
