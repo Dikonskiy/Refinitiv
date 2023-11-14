@@ -15,13 +15,13 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	token, err := h.Repo.GenerateJWTToken(request.CreateServiceTokenRequest1.Username, request.CreateServiceTokenRequest1.ApplicationID)
+	ServiceToken, err := h.Token.GenerateJWTToken(request.CreateServiceTokenRequest1.Username, request.CreateServiceTokenRequest1.ApplicationID)
 	if err != nil {
 		http.Error(w, "Failed to generate/get token", http.StatusBadRequest)
 		return
 	}
 
-	expiration, err := h.Repo.GetTokenExpiration(token)
+	expiration, err := h.Token.GetTokenExpiration(ServiceToken)
 	if err != nil {
 		http.Error(w, "Failed to get expiration", http.StatusBadRequest)
 	}
@@ -31,7 +31,7 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 			Expiration string `json:"Expiration"`
 			Token      string `json:"Token"`
 		}{
-			Token:      token,
+			Token:      ServiceToken,
 			Expiration: expiration,
 		},
 	}
@@ -52,13 +52,13 @@ func (h *Handlers) CreateImpersonationTokenHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	token, err := h.Repo.GenerateImpersonationToken(request.EffectiveUsername.UserType, request.EffectiveUsername.Value)
+	ImpersonationToken, err := h.Token.GenerateImpersonationToken(request.EffectiveUsername.UserType, request.EffectiveUsername.Value)
 	if err != nil {
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
 		return
 	}
 
-	expiration, err := h.Repo.GetTokenExpiration(token)
+	expiration, err := h.Token.GetTokenExpiration(ImpersonationToken)
 	if err != nil {
 		http.Error(w, "Failed to get expiration: "+err.Error(), http.StatusBadRequest)
 		return
@@ -75,7 +75,7 @@ func (h *Handlers) CreateImpersonationTokenHandler(w http.ResponseWriter, r *htt
 			Token      string `json:"Token"`
 		}{
 			Expiration: expiration,
-			Token:      token,
+			Token:      ImpersonationToken,
 		},
 	}
 
@@ -91,13 +91,13 @@ func (h *Handlers) GenerateServiceAndImpersonationToken(w http.ResponseWriter, r
 		return
 	}
 
-	token, err := h.Repo.GenerateServiceAndImpersonationToken(request.CreateImpersonationTokenRequest2.ApplicationID, request.CreateImpersonationTokenRequest2.Username, request.CreateImpersonationTokenRequest2.EffectiveUsername.UserType, request.CreateImpersonationTokenRequest2.EffectiveUsername.Value)
+	token, err := h.Token.GenerateServiceAndImpersonationToken(request.CreateImpersonationTokenRequest2.ApplicationID, request.CreateImpersonationTokenRequest2.Username, request.CreateImpersonationTokenRequest2.EffectiveUsername.UserType, request.CreateImpersonationTokenRequest2.EffectiveUsername.Value)
 	if err != nil {
 		http.Error(w, "Error generating token: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	expiration, err := h.Repo.GetTokenExpiration(token)
+	expiration, err := h.Token.GetTokenExpiration(token)
 	if err != nil {
 		http.Error(w, "Failed to get expiration: "+err.Error(), http.StatusBadRequest)
 		return
@@ -120,4 +120,8 @@ func (h *Handlers) GenerateServiceAndImpersonationToken(w http.ResponseWriter, r
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func (h *Handlers) CreateImpersonationToken3(w http.ResponseWriter, r *http.Request) {
+
 }

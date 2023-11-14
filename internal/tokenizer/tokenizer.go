@@ -1,4 +1,4 @@
-package repository
+package tokenizer
 
 import (
 	"fmt"
@@ -7,17 +7,17 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type Repository struct {
+type Tokenizer struct {
 	UserTokens map[string]map[string]string
 }
 
-func NewRepository() *Repository {
-	return &Repository{
+func NewTokenizer() *Tokenizer {
+	return &Tokenizer{
 		UserTokens: make(map[string]map[string]string),
 	}
 }
 
-func (r *Repository) GenerateJWTToken(username, applicationID string) (string, error) {
+func (r *Tokenizer) GenerateJWTToken(username, applicationID string) (string, error) {
 	if userTokens, ok := r.UserTokens[applicationID]; ok {
 		if existingToken, ok := userTokens[username]; ok {
 			expiration, err := r.GetTokenExpiration(existingToken)
@@ -52,7 +52,7 @@ func (r *Repository) GenerateJWTToken(username, applicationID string) (string, e
 	return tokenString, nil
 }
 
-func (r *Repository) GetTokenExpiration(tokenString string) (string, error) {
+func (r *Tokenizer) GetTokenExpiration(tokenString string) (string, error) {
 	parsedToken, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
 	if err != nil {
 		return "", err
@@ -71,7 +71,7 @@ func (r *Repository) GetTokenExpiration(tokenString string) (string, error) {
 	return "", fmt.Errorf("invalid token claims")
 }
 
-func (r *Repository) ValidateJWTToken(applicationID, token string) (bool, string) {
+func (r *Tokenizer) ValidateJWTToken(applicationID, token string) (bool, string) {
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("invalid signing method")
@@ -108,7 +108,7 @@ func (r *Repository) ValidateJWTToken(applicationID, token string) (bool, string
 	return false, ""
 }
 
-func (r *Repository) GenerateImpersonationToken(usertype, value string) (string, error) {
+func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, error) {
 	if userTokens, ok := r.UserTokens[usertype]; ok {
 		if existingToken, ok := userTokens[value]; ok {
 			expiration, err := r.GetTokenExpiration(existingToken)
@@ -143,7 +143,7 @@ func (r *Repository) GenerateImpersonationToken(usertype, value string) (string,
 	return tokenString, nil
 }
 
-func (r *Repository) GenerateServiceAndImpersonationToken(applicationID, username, usertype, value string) (string, error) {
+func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username, usertype, value string) (string, error) {
 	if userTokens, ok := r.UserTokens[applicationID]; ok {
 		if existingToken, ok := userTokens[username]; ok {
 			expiration, err := r.GetTokenExpiration(existingToken)
