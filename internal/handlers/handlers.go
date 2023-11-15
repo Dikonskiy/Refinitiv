@@ -5,11 +5,11 @@ import (
 )
 
 type Handlers struct {
-	Token *tokenizer.Tokenizer
+	Tokenizer *tokenizer.Tokenizer
 }
 
 func NewHandlers(token *tokenizer.Tokenizer) *Handlers {
 	return &Handlers{
-		Token: token,
+		Tokenizer: token,
 	}
 }

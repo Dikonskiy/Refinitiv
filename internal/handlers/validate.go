@@ -15,7 +15,7 @@ func (h *Handlers) ValidateServiceTokenHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	isValid, expiration := h.Token.ValidateJWTToken(request.ValidateTokenRequest1.ApplicationID, request.ValidateTokenRequest1.Token)
+	isValid, expiration := h.Tokenizer.ValidateJWTToken(request.ValidateTokenRequest1.ApplicationID, request.ValidateTokenRequest1.Token)
 	if !isValid {
 		response := models.ValidateTokenResponse{
 			ValidateTokenResponse1: struct {

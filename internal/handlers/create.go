@@ -15,13 +15,13 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	ServiceToken, err := h.Token.GenerateJWTToken(request.CreateServiceTokenRequest1.Username, request.CreateServiceTokenRequest1.ApplicationID)
+	ServiceToken, err := h.Tokenizer.GenerateJWTToken(request.CreateServiceTokenRequest1.Username, request.CreateServiceTokenRequest1.ApplicationID)
 	if err != nil {
 		http.Error(w, "Failed to generate/get token", http.StatusBadRequest)
 		return
 	}
 
-	expiration, err := h.Token.GetTokenExpiration(ServiceToken)
+	expiration, err := h.Tokenizer.GetTokenExpiration(ServiceToken)
 	if err != nil {
 		http.Error(w, "Failed to get expiration", http.StatusBadRequest)
 	}
@@ -52,13 +52,13 @@ func (h *Handlers) CreateImpersonationTokenHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	ImpersonationToken, err := h.Token.GenerateImpersonationToken(request.EffectiveUsername.UserType, request.EffectiveUsername.Value)
+	ImpersonationToken, err := h.Tokenizer.GenerateImpersonationToken(request.EffectiveUsername.UserType, request.EffectiveUsername.Value)
 	if err != nil {
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
 		return
 	}
 
-	expiration, err := h.Token.GetTokenExpiration(ImpersonationToken)
+	expiration, err := h.Tokenizer.GetTokenExpiration(ImpersonationToken)
 	if err != nil {
 		http.Error(w, "Failed to get expiration: "+err.Error(), http.StatusBadRequest)
 		return
@@ -91,13 +91,13 @@ func (h *Handlers) GenerateServiceAndImpersonationToken(w http.ResponseWriter, r
 		return
 	}
 
-	token, err := h.Token.GenerateServiceAndImpersonationToken(request.CreateImpersonationTokenRequest2.ApplicationID, request.CreateImpersonationTokenRequest2.Username, request.CreateImpersonationTokenRequest2.EffectiveUsername.UserType, request.CreateImpersonationTokenRequest2.EffectiveUsername.Value)
+	token, err := h.Tokenizer.GenerateServiceAndImpersonationToken(request.CreateImpersonationTokenRequest2.ApplicationID, request.CreateImpersonationTokenRequest2.Username, request.CreateImpersonationTokenRequest2.EffectiveUsername.UserType, request.CreateImpersonationTokenRequest2.EffectiveUsername.Value)
 	if err != nil {
 		http.Error(w, "Error generating token: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	expiration, err := h.Token.GetTokenExpiration(token)
+	expiration, err := h.Tokenizer.GetTokenExpiration(token)
 	if err != nil {
 		http.Error(w, "Failed to get expiration: "+err.Error(), http.StatusBadRequest)
 		return

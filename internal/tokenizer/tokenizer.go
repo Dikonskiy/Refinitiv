@@ -8,30 +8,21 @@ import (
 )
 
 type Tokenizer struct {
-	UserTokens map[string]map[string]string
+	ServiceTokens       map[string]map[string]string
+	ImpersonationTokens map[string]map[string]string
 }
 
 func NewTokenizer() *Tokenizer {
 	return &Tokenizer{
-		UserTokens: make(map[string]map[string]string),
+		ServiceTokens:       make(map[string]map[string]string),
+		ImpersonationTokens: make(map[string]map[string]string),
 	}
 }
 
 func (r *Tokenizer) GenerateJWTToken(username, applicationID string) (string, error) {
-	if userTokens, ok := r.UserTokens[applicationID]; ok {
-		if existingToken, ok := userTokens[username]; ok {
-			expiration, err := r.GetTokenExpiration(existingToken)
-			if err != nil {
-				return "", err
-			}
 
-			expirationTime, _ := time.Parse(time.RFC3339, expiration)
-			if time.Now().Before(expirationTime) {
-				return existingToken, nil
-			}
-		}
-	} else {
-		r.UserTokens[applicationID] = make(map[string]string)
+	if len(r.ServiceTokens[applicationID]) > 0 {
+		delete(r.ServiceTokens[applicationID], username)
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -42,14 +33,14 @@ func (r *Tokenizer) GenerateJWTToken(username, applicationID string) (string, er
 	claims["appid"] = applicationID
 
 	tokenString, err := token.SignedString([]byte("your-secret-key"))
-
 	if err != nil {
 		return "", err
 	}
 
-	r.UserTokens[applicationID][username] = tokenString
+	r.ServiceTokens[applicationID] = map[string]string{username: tokenString}
 
 	return tokenString, nil
+
 }
 
 func (r *Tokenizer) GetTokenExpiration(tokenString string) (string, error) {
@@ -84,32 +75,50 @@ func (r *Tokenizer) ValidateJWTToken(applicationID, token string) (bool, string)
 		return false, ""
 	}
 
-	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
-		appID, appIDOk := claims["appid"].(string)
-		if !appIDOk || appID != applicationID {
-			fmt.Println("AppID does not match")
-			return false, ""
+	username, usernameOk := r.getUsernameFromToken(parsedToken)
+	if !usernameOk {
+		fmt.Println("Username not found in token claims")
+		return false, ""
+	}
+	if storedToken, exists := r.ServiceTokens[applicationID][username]; exists && token == storedToken {
+		if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+			expiration, expOk := claims["exp"].(float64)
+			if !expOk {
+				fmt.Println("Missing 'exp' claim in the token")
+				return false, ""
+			}
+
+			fmt.Printf("Expiration: %f\n", expiration)
+
+			expirationTime := time.Unix(int64(expiration), 0)
+
+			return true, expirationTime.Format(time.RFC3339)
 		}
 
-		expiration, expOk := claims["exp"].(float64)
-		if !expOk {
-			fmt.Println("Missing 'exp' claim in the token")
-			return false, ""
-		}
-
-		fmt.Printf("Expiration: %f\n", expiration)
-
-		expirationTime := time.Unix(int64(expiration), 0)
-
-		return true, expirationTime.Format(time.RFC3339)
+		fmt.Println("Token is not valid or claims do not match")
+		return false, ""
 	}
 
-	fmt.Println("Token is not valid or claims do not match")
+	fmt.Println("Token not found in ServiceTokens map or does not match")
 	return false, ""
 }
 
+func (r *Tokenizer) getUsernameFromToken(parsedToken *jwt.Token) (string, bool) {
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", false
+	}
+
+	username, usernameOk := claims["username"].(string)
+	return username, usernameOk
+}
+
 func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, error) {
-	if userTokens, ok := r.UserTokens[usertype]; ok {
+	if len(r.ImpersonationTokens[usertype]) > 0 {
+		delete(r.ImpersonationTokens[usertype], value)
+	}
+
+	if userTokens, ok := r.ImpersonationTokens[usertype]; ok {
 		if existingToken, ok := userTokens[value]; ok {
 			expiration, err := r.GetTokenExpiration(existingToken)
 			if err != nil {
@@ -119,10 +128,12 @@ func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, 
 			expirationTime, _ := time.Parse(time.RFC3339, expiration)
 			if time.Now().Before(expirationTime) {
 				return existingToken, nil
+			} else {
+				delete(r.ImpersonationTokens[usertype], value)
 			}
 		}
 	} else {
-		r.UserTokens[usertype] = make(map[string]string)
+		r.ImpersonationTokens[usertype] = make(map[string]string)
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -138,13 +149,13 @@ func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, 
 		return "", err
 	}
 
-	r.UserTokens[usertype][value] = tokenString
+	r.ImpersonationTokens[usertype][value] = tokenString
 
 	return tokenString, nil
 }
 
 func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username, usertype, value string) (string, error) {
-	if userTokens, ok := r.UserTokens[applicationID]; ok {
+	if userTokens, ok := r.ServiceTokens[applicationID]; ok {
 		if existingToken, ok := userTokens[username]; ok {
 			expiration, err := r.GetTokenExpiration(existingToken)
 			if err != nil {
@@ -156,7 +167,7 @@ func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username
 				return existingToken, nil
 			}
 		}
-	} else if userTokens, ok := r.UserTokens[usertype]; ok {
+	} else if userTokens, ok := r.ServiceTokens[usertype]; ok {
 		if existingToken, ok := userTokens[value]; ok {
 			expiration, err := r.GetTokenExpiration(existingToken)
 			if err != nil {
@@ -169,7 +180,7 @@ func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username
 			}
 		}
 	} else {
-		r.UserTokens[applicationID] = make(map[string]string)
+		r.ServiceTokens[applicationID] = make(map[string]string)
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -186,7 +197,7 @@ func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username
 		return "", err
 	}
 
-	r.UserTokens[applicationID][username] = tokenString
+	r.ServiceTokens[applicationID][username] = tokenString
 
 	return tokenString, nil
 }
