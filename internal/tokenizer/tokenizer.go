@@ -2,12 +2,14 @@ package tokenizer
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type Tokenizer struct {
+	mu                  sync.Mutex
 	ServiceTokens       map[string]map[string]string
 	ImpersonationTokens map[string]map[string]string
 }
@@ -20,6 +22,8 @@ func NewTokenizer() *Tokenizer {
 }
 
 func (r *Tokenizer) GenerateJWTToken(username, applicationID string) (string, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	if len(r.ServiceTokens[applicationID]) > 0 {
 		delete(r.ServiceTokens[applicationID], username)
@@ -114,6 +118,9 @@ func (r *Tokenizer) getUsernameFromToken(parsedToken *jwt.Token) (string, bool) 
 }
 
 func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if len(r.ImpersonationTokens[usertype]) > 0 {
 		delete(r.ImpersonationTokens[usertype], value)
 	}
@@ -139,8 +146,11 @@ func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, 
 }
 
 func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username, usertype, value string) (string, error) {
-	if len(r.ImpersonationTokens[usertype]) > 0 {
-		delete(r.ImpersonationTokens[usertype], value)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if len(r.ServiceTokens[applicationID]) > 0 {
+		delete(r.ServiceTokens[applicationID], username)
 	}
 
 	if len(r.ImpersonationTokens[usertype]) > 0 {
@@ -160,6 +170,9 @@ func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username
 	if err != nil {
 		return "", err
 	}
+
+	r.ServiceTokens[applicationID] = make(map[string]string)
+	r.ImpersonationTokens[usertype] = make(map[string]string)
 
 	r.ServiceTokens[applicationID][username] = tokenString
 	r.ImpersonationTokens[usertype][value] = tokenString
