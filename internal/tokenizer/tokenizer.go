@@ -118,24 +118,6 @@ func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, 
 		delete(r.ImpersonationTokens[usertype], value)
 	}
 
-	if userTokens, ok := r.ImpersonationTokens[usertype]; ok {
-		if existingToken, ok := userTokens[value]; ok {
-			expiration, err := r.GetTokenExpiration(existingToken)
-			if err != nil {
-				return "", err
-			}
-
-			expirationTime, _ := time.Parse(time.RFC3339, expiration)
-			if time.Now().Before(expirationTime) {
-				return existingToken, nil
-			} else {
-				delete(r.ImpersonationTokens[usertype], value)
-			}
-		}
-	} else {
-		r.ImpersonationTokens[usertype] = make(map[string]string)
-	}
-
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -144,6 +126,8 @@ func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, 
 	claims["exp"] = time.Now().Add(90 * time.Minute).Unix()
 
 	tokenString, err := token.SignedString([]byte("your-secret-key"))
+
+	r.ImpersonationTokens[usertype] = map[string]string{value: tokenString}
 
 	if err != nil {
 		return "", err
@@ -155,32 +139,12 @@ func (r *Tokenizer) GenerateImpersonationToken(usertype, value string) (string, 
 }
 
 func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username, usertype, value string) (string, error) {
-	if userTokens, ok := r.ServiceTokens[applicationID]; ok {
-		if existingToken, ok := userTokens[username]; ok {
-			expiration, err := r.GetTokenExpiration(existingToken)
-			if err != nil {
-				return "", err
-			}
+	if len(r.ImpersonationTokens[usertype]) > 0 {
+		delete(r.ImpersonationTokens[usertype], value)
+	}
 
-			expirationTime, _ := time.Parse(time.RFC3339, expiration)
-			if time.Now().Before(expirationTime) {
-				return existingToken, nil
-			}
-		}
-	} else if userTokens, ok := r.ServiceTokens[usertype]; ok {
-		if existingToken, ok := userTokens[value]; ok {
-			expiration, err := r.GetTokenExpiration(existingToken)
-			if err != nil {
-				return "", err
-			}
-
-			expirationTime, _ := time.Parse(time.RFC3339, expiration)
-			if time.Now().Before(expirationTime) {
-				return existingToken, nil
-			}
-		}
-	} else {
-		r.ServiceTokens[applicationID] = make(map[string]string)
+	if len(r.ImpersonationTokens[usertype]) > 0 {
+		delete(r.ImpersonationTokens[usertype], value)
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -198,6 +162,7 @@ func (r *Tokenizer) GenerateServiceAndImpersonationToken(applicationID, username
 	}
 
 	r.ServiceTokens[applicationID][username] = tokenString
+	r.ImpersonationTokens[usertype][value] = tokenString
 
 	return tokenString, nil
 }
