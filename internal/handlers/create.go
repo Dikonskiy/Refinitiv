@@ -26,6 +26,8 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 		http.Error(w, "Failed to get expiration", http.StatusBadRequest)
 	}
 
+	appId := request.CreateServiceTokenRequest1.ApplicationID
+
 	response := models.CreateServiceTokenResponse{
 		CreateServiceTokenResponse1: struct {
 			Expiration string `json:"Expiration"`
@@ -37,6 +39,8 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Trkd-Auth-Token", ServiceToken)
+	w.Header().Set("X-Trkd-Auth-ApplicationID", appId)
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
