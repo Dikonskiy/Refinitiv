@@ -39,6 +39,7 @@ func (a *Application) StartServer(config *models.Config) {
 	r.HandleFunc("/api/TokenManagement/TokenManagement.svc/REST/Anonymous/TokenManagement_1/ValidateServiceToken_1", Hand.ValidateServiceTokenHandler)
 	r.HandleFunc("/api/TokenManagement/TokenManagement.svc/REST/Anonymous/TokenManagement_1/CreateImpersonationToken_1", Hand.CreateImpersonationTokenHandler)
 	r.HandleFunc("/api/TokenManagement/TokenManagement.svc/REST/Anonymous/TokenManagement_1/CreateImpersonationToken_2", Hand.GenerateServiceAndImpersonationToken)
+	r.HandleFunc("/api/TokenManagement/TokenManagement.svc/REST/Anonymous/TokenManagement_1/RetrieveItem_Request_3", Hand.GetQuotes)
 
 	server := &http.Server{
 		Addr:         ":" + config.ListenPort,
