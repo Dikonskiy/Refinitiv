@@ -17,3 +17,23 @@ func Fields() ([]models.Field, error) {
 
 	return fields, nil
 }
+
+func NewQoS(timeInfo int, timeliness string, rateTimeInfo int, rate string) models.QoS {
+	return models.QoS{
+		TimelinessInfo: models.TimelinessInfo{
+			TimeInfo:   timeInfo,
+			Timeliness: timeliness,
+		},
+		RateInfo: models.RateInfo{
+			TimeInfo: rateTimeInfo,
+			Rate:     rate,
+		},
+	}
+}
+
+func NewStatus(statusMsg string, statusCode int) models.Status {
+	return models.Status{
+		StatusMsg:  statusMsg,
+		StatusCode: statusCode,
+	}
+}

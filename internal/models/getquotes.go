@@ -24,21 +24,29 @@ type RetrieveItemResponse3 struct {
 
 type Item struct {
 	RequestKey RequestKey `json:"RequestKey"`
-	QoS        struct {
-		TimelinessInfo struct {
-			TimeInfo   int    `json:"TimeInfo"`
-			Timeliness string `json:"Timeliness"`
-		} `json:"TimelinessInfo"`
-		RateInfo struct {
-			TimeInfo int    `json:"TimeInfo"`
-			Rate     string `json:"Rate"`
-		} `json:"RateInfo"`
-	} `json:"QoS"`
-	Status struct {
-		StatusMsg  string `json:"StatusMsg"`
-		StatusCode int    `json:"StatusCode"`
-	} `json:"Status"`
-	Fields struct {
+	QoS        QoS        `json:"QoS"`
+	Status     Status     `json:"Status"`
+	Fields     struct {
 		Field []Field `json:"Field"`
 	} `json:"Fields"`
+}
+
+type QoS struct {
+	TimelinessInfo TimelinessInfo `json:"TimelinessInfo"`
+	RateInfo       RateInfo       `json:"RateInfo"`
+}
+
+type TimelinessInfo struct {
+	TimeInfo   int    `json:"TimeInfo"`
+	Timeliness string `json:"Timeliness"`
+}
+
+type RateInfo struct {
+	TimeInfo int    `json:"TimeInfo"`
+	Rate     string `json:"Rate"`
+}
+
+type Status struct {
+	StatusMsg  string `json:"StatusMsg"`
+	StatusCode int    `json:"StatusCode"`
 }

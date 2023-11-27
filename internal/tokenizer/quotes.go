@@ -7,6 +7,9 @@ import (
 )
 
 func (t *Tokenizer) GenerateRetrieveItemResponse(request models.RetrieveItemRequest3) ([]byte, error) {
+	qos := fields.NewQoS(0, "REALTIME", 3000, "TICK_BY_TICK")
+	status := fields.NewStatus("OK", 0)
+
 	fields, err := fields.Fields()
 	if err != nil {
 		return nil, err
@@ -18,29 +21,8 @@ func (t *Tokenizer) GenerateRetrieveItemResponse(request models.RetrieveItemRequ
 				Item: []models.Item{
 					{
 						RequestKey: request.ItemRequest[0].RequestKey[0],
-						QoS: struct {
-							TimelinessInfo struct {
-								TimeInfo   int    `json:"TimeInfo"`
-								Timeliness string `json:"Timeliness"`
-							} `json:"TimelinessInfo"`
-							RateInfo struct {
-								TimeInfo int    `json:"TimeInfo"`
-								Rate     string `json:"Rate"`
-							} `json:"RateInfo"`
-						}{
-							TimelinessInfo: struct {
-								TimeInfo   int    `json:"TimeInfo"`
-								Timeliness string `json:"Timeliness"`
-							}{},
-							RateInfo: struct {
-								TimeInfo int    `json:"TimeInfo"`
-								Rate     string `json:"Rate"`
-							}{},
-						},
-						Status: struct {
-							StatusMsg  string `json:"StatusMsg"`
-							StatusCode int    `json:"StatusCode"`
-						}{},
+						QoS:        qos,
+						Status:     status,
 						Fields: struct {
 							Field []models.Field `json:"Field"`
 						}{Field: fields},
