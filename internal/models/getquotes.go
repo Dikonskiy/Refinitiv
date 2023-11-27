@@ -1,12 +1,16 @@
 package models
 
 type RetrieveItemRequest3 struct {
-	TrimResponse bool `json:"TrimResponse"`
-	ItemRequest  []struct {
-		Fields     string       `json:"Fields"`
-		RequestKey []RequestKey `json:"RequestKey"`
-		Scope      string       `json:"Scope"`
-	} `json:"ItemRequest"`
+	RetrieveItemRequest3 struct {
+		TrimResponse bool        `json:"TrimResponse"`
+		ItemRequest  ItemRequest `json:"ItemRequest"`
+	} `json:"RetrieveItem_Request_3"`
+}
+
+type ItemRequest struct {
+	Fields     string     `json:"Fields"`
+	RequestKey RequestKey `json:"RequestKey"`
+	Scope      string     `json:"Scope"`
 }
 
 type RequestKey struct {
@@ -19,7 +23,9 @@ type ItemResponse struct {
 }
 
 type RetrieveItemResponse3 struct {
-	ItemResponse []ItemResponse `json:"ItemResponse"`
+	RetrieveItemResponset3 struct {
+		ItemResponse []ItemResponse `json:"ItemResponse"`
+	} `json:"RetrieveItem_Request_3"`
 }
 
 type Item struct {

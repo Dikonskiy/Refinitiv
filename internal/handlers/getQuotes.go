@@ -9,7 +9,7 @@ import (
 
 func (h *Handlers) GetQuotes(w http.ResponseWriter, r *http.Request) {
 	var request models.RetrieveItemRequest3
-	err := json.NewDecoder(r.Body).Decode(&request)
+	err := json.NewDecoder(r.Body).Decode(&request.RetrieveItemRequest3)
 	if err != nil {
 		http.Error(w, "Failed to parse the request body", http.StatusBadRequest)
 		return
@@ -24,7 +24,8 @@ func (h *Handlers) GetQuotes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Printf("Error encoding response: %v", err)
+	_, err = w.Write(response)
+	if err != nil {
+		log.Printf("Error writing response: %v", err)
 	}
 }
