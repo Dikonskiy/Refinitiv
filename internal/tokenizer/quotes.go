@@ -15,8 +15,8 @@ func (t *Tokenizer) GenerateRetrieveItemResponse(request models.RetrieveItemRequ
 	}
 
 	requestKey := models.RequestKey{
-		NameType: request.RetrieveItemRequest3.ItemRequest.RequestKey.NameType,
-		Name:     request.RetrieveItemRequest3.ItemRequest.RequestKey.Name,
+		NameType: request.RetrieveItemRequest3.ItemRequest[0].RequestKey[0].NameType,
+		Name:     request.RetrieveItemRequest3.ItemRequest[0].RequestKey[0].Name,
 	}
 
 	response := models.RetrieveItemResponse3{

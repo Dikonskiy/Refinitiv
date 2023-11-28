@@ -2,15 +2,15 @@ package models
 
 type RetrieveItemRequest3 struct {
 	RetrieveItemRequest3 struct {
-		TrimResponse bool        `json:"TrimResponse"`
-		ItemRequest  ItemRequest `json:"ItemRequest"`
+		TrimResponse bool          `json:"TrimResponse"`
+		ItemRequest  []ItemRequest `json:"ItemRequest"`
 	} `json:"RetrieveItem_Request_3"`
 }
 
 type ItemRequest struct {
-	Fields     string     `json:"Fields"`
-	RequestKey RequestKey `json:"RequestKey"`
-	Scope      string     `json:"Scope"`
+	Fields     string       `json:"Fields"`
+	RequestKey []RequestKey `json:"RequestKey"`
+	Scope      string       `json:"Scope"`
 }
 
 type RequestKey struct {
@@ -55,4 +55,12 @@ type RateInfo struct {
 type Status struct {
 	StatusMsg  string `json:"StatusMsg"`
 	StatusCode int    `json:"StatusCode"`
+}
+
+type Field struct {
+	Name       string  `json:"Name"`
+	DataType   string  `json:"DataType"`
+	Int32      int     `json:"Int32,omitempty"`
+	Utf8String string  `json:"Utf8String,omitempty"`
+	Double     float64 `json:"Double,omitempty"`
 }
