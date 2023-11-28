@@ -15,6 +15,7 @@ type ItemRequest struct {
 
 type RequestKey struct {
 	NameType string `json:"NameType"`
+	Service  string `json:"Service,omitempty"`
 	Name     string `json:"Name"`
 }
 
@@ -25,7 +26,7 @@ type ItemResponse struct {
 type RetrieveItemResponse3 struct {
 	RetrieveItemResponset3 struct {
 		ItemResponse []ItemResponse `json:"ItemResponse"`
-	} `json:"RetrieveItem_Request_3"`
+	} `json:"RetrieveItem_Response_3"`
 }
 
 type Item struct {

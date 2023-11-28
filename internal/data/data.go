@@ -13,6 +13,8 @@ func Fields() ([]models.Field, error) {
 		{Name: "CF_YIELD", DataType: "Double", Double: 3.5658},
 		{Name: "CF_NAME", DataType: "Utf8String", Utf8String: "EXXON MOBIL"},
 		{Name: "CF_CURRENCY", DataType: "Utf8String", Utf8String: "USD"},
+		{Name: "BID", DataType: "Double", Double: 100.25},
+		{Name: "CF_BID", DataType: "Double", Double: 99.75},
 	}
 
 	return fields, nil
