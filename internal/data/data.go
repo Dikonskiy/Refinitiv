@@ -1,4 +1,4 @@
-package fields
+package data
 
 import "Refinitiv/internal/models"
 

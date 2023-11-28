@@ -15,7 +15,7 @@ func (h *Handlers) GetQuotes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.Tokenizer.GenerateRetrieveItemResponse(request)
+	response, err := h.Quotes.GenerateRetrieveItemResponse(request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

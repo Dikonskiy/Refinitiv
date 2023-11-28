@@ -1,15 +1,22 @@
-package tokenizer
+package quotes
 
 import (
-	"Refinitiv/internal/fields"
+	"Refinitiv/internal/data"
 	"Refinitiv/internal/models"
 	"encoding/json"
 )
 
-func (t *Tokenizer) GenerateRetrieveItemResponse(request models.RetrieveItemRequest3) ([]byte, error) {
-	qos := fields.NewQoS(0, "REALTIME", 3000, "TICK_BY_TICK")
-	status := fields.NewStatus("OK", 0)
-	fields, err := fields.Fields()
+type Quotes struct {
+}
+
+func NewQuotes() *Quotes {
+	return &Quotes{}
+}
+
+func (q *Quotes) GenerateRetrieveItemResponse(request models.RetrieveItemRequest3) ([]byte, error) {
+	qos := data.NewQoS(0, "REALTIME", 3000, "TICK_BY_TICK")
+	status := data.NewStatus("OK", 0)
+	fields, err := data.Fields()
 	if err != nil {
 		return nil, err
 	}

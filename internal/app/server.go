@@ -3,6 +3,7 @@ package app
 import (
 	"Refinitiv/internal/handlers"
 	"Refinitiv/internal/models"
+	"Refinitiv/internal/quotes"
 	"Refinitiv/internal/tokenizer"
 	"fmt"
 	"log"
@@ -23,13 +24,15 @@ func NewApplication() *Application {
 }
 
 var (
-	Token *tokenizer.Tokenizer
-	Hand  *handlers.Handlers
+	Quotes *quotes.Quotes
+	Token  *tokenizer.Tokenizer
+	Hand   *handlers.Handlers
 )
 
 func init() {
 	Token = tokenizer.NewTokenizer()
-	Hand = handlers.NewHandlers(Token)
+	Quotes = quotes.NewQuotes()
+	Hand = handlers.NewHandlers(Token, Quotes)
 }
 
 func (a *Application) StartServer(config *models.Config) {
