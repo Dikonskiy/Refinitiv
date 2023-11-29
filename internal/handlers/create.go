@@ -3,6 +3,7 @@ package handlers
 import (
 	"Refinitiv/internal/models"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -28,6 +29,9 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 
 	appId := request.CreateServiceTokenRequest1.ApplicationID
 
+	fmt.Println("Service Token", ServiceToken)
+	fmt.Println("Service ApplicationID", appId)
+
 	response := models.CreateServiceTokenResponse{
 		CreateServiceTokenResponse1: struct {
 			Expiration string `json:"Expiration"`
@@ -39,10 +43,7 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Trkd-Auth-Token", ServiceToken)
-	w.Header().Set("X-Trkd-Auth-ApplicationID", appId)
 	w.WriteHeader(http.StatusOK)
-
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding response: %v", err)
 	}
@@ -124,8 +125,4 @@ func (h *Handlers) GenerateServiceAndImpersonationToken(w http.ResponseWriter, r
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
-}
-
-func (h *Handlers) CreateImpersonationToken3(w http.ResponseWriter, r *http.Request) {
-
 }

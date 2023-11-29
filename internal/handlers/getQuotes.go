@@ -3,6 +3,7 @@ package handlers
 import (
 	"Refinitiv/internal/models"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -27,5 +28,19 @@ func (h *Handlers) GetQuotes(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write(response)
 	if err != nil {
 		log.Printf("Error writing response: %v", err)
+
+	}
+	token := r.Header.Get("Authorization")
+	appID := r.Header.Get("ApplicationID")
+
+	fmt.Println("Retrieve token", token)
+	fmt.Println("Retrieve appID", appID)
+
+	isValid, _ := h.Tokenizer.ValidateJWTToken(appID, token)
+
+	if !isValid {
+		log.Println("Invalid token")
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
 	}
 }
