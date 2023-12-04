@@ -16,6 +16,20 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if request.CreateServiceTokenRequest1.ApplicationID != "1" ||
+		request.CreateServiceTokenRequest1.Username != "Dias" ||
+		request.CreateServiceTokenRequest1.Password != "111" {
+		fmt.Println("Invalid user")
+		errorMessage, err := h.Error.GenerateErrorResponse("Invalid user name or password.")
+		if err != nil {
+			log.Printf("Error generating error message: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		http.Error(w, errorMessage, http.StatusUnauthorized)
+		return
+	}
+
 	ServiceToken, err := h.Tokenizer.GenerateJWTToken(request.CreateServiceTokenRequest1.Username, request.CreateServiceTokenRequest1.ApplicationID)
 	if err != nil {
 		http.Error(w, "Failed to generate/get token", http.StatusBadRequest)

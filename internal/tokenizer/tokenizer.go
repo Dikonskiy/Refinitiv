@@ -33,7 +33,7 @@ func (r *Tokenizer) GenerateJWTToken(username, applicationID string) (string, er
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
-	claims["exp"] = time.Now().Add(1 * time.Minute).Unix()
+	claims["exp"] = time.Now().Add(90 * time.Minute).Unix()
 	claims["appid"] = applicationID
 
 	tokenString, err := token.SignedString([]byte("your-secret-key"))
