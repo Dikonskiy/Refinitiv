@@ -79,7 +79,7 @@ func setTokenMiddleware(tokenizer *tokenizer.Tokenizer) mux.MiddlewareFunc {
 			token, exists := tokenizer.ServiceTokens[applicationID][username]
 			if !exists {
 				fmt.Println("Token not found")
-				errorMessage, err := Error.GenerateErrorResponse("Token not found")
+				errorMessage, err := Error.GenerateErrorResponse("Missing the mandatory 'http://www.reuters.com/ns/2006/05/01/webservices/rkd/Common_1:Authorization' SOAP header in the user request.", "a:Security_MissingAuthorization")
 				if err != nil {
 					log.Printf("Error generating error message: %v", err)
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
