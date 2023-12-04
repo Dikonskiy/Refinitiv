@@ -1,8 +1,8 @@
 # Refinitiv
 For this service:
-ApplicationID = 1
-Username = Dias
-Password = 111
+<br />ApplicationID = 1
+<br />Username = Dias
+<br />Password = 111
 
 # Endpoints
 /api/TokenManagement/TokenManagement.svc/REST/Anonymous/TokenManagement_1/CreateServiceToken_1
