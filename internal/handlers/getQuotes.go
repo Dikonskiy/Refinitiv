@@ -15,7 +15,7 @@ func (h *Handlers) GetQuotes(w http.ResponseWriter, r *http.Request) {
 
 	if !isValid {
 		log.Println("Invalid token")
-		errorMessage, err := h.Error.GenerateErrorResponse("Token is expired")
+		errorMessage, err := h.Error.GenerateErrorResponse("Token is expired", "a:Security_ExpiredToken")
 		if err != nil {
 			log.Printf("Error generating error message: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

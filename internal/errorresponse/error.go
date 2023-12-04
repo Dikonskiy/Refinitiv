@@ -14,13 +14,13 @@ func NewError() *Error {
 	return &Error{}
 }
 
-func (e *Error) GenerateErrorResponse(errMsg string) (string, error) {
+func (e *Error) GenerateErrorResponse(errMsg, subcode string) (string, error) {
 	error := models.ErrorResponse{
 		Fault: models.Fault{
 			Code: models.Code{
 				Value: "s.Receiver",
 				Subcode: models.Subcode{
-					Value: "a:Security_ExpiredToken",
+					Value: subcode,
 				},
 			},
 			Reason: models.Reason{
