@@ -1,6 +1,7 @@
 package app
 
 import (
+	"Refinitiv/internal/errorresponse"
 	"Refinitiv/internal/handlers"
 	"Refinitiv/internal/quotes"
 	"Refinitiv/internal/tokenizer"
@@ -25,13 +26,15 @@ func NewApplication() *Application {
 var (
 	Quotes *quotes.Quotes
 	Token  *tokenizer.Tokenizer
+	Error  *errorresponse.Error
 	Hand   *handlers.Handlers
 )
 
 func init() {
 	Token = tokenizer.NewTokenizer()
 	Quotes = quotes.NewQuotes()
-	Hand = handlers.NewHandlers(Token, Quotes)
+	Error = errorresponse.NewError()
+	Hand = handlers.NewHandlers(Token, Quotes, Error)
 }
 
 func (a *Application) StartServer(listenPort, route string) {
@@ -73,13 +76,16 @@ func setTokenMiddleware(tokenizer *tokenizer.Tokenizer) mux.MiddlewareFunc {
 			username := "Dias"
 			applicationID := "1"
 
-			fmt.Println("Middleware: username =", username, "applicationID =", applicationID)
-			fmt.Println("ServiceTokens map:", tokenizer.ServiceTokens)
-
 			token, exists := tokenizer.ServiceTokens[applicationID][username]
 			if !exists {
 				fmt.Println("Token not found")
-				http.Error(w, "Token not found", http.StatusUnauthorized)
+				errorMessage, err := Error.GenerateErrorResponse("Token not found")
+				if err != nil {
+					log.Printf("Error generating error message: %v", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				http.Error(w, errorMessage, http.StatusUnauthorized)
 				return
 			}
 
