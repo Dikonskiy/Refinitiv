@@ -15,6 +15,6 @@ func main() {
 
 	app := app.NewApplication()
 
-	app.StartServer(cnfg)
+	app.StartServer(cnfg.ListenPort, cnfg.Route)
 
 }

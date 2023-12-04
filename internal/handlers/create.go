@@ -3,6 +3,7 @@ package handlers
 import (
 	"Refinitiv/internal/models"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -12,6 +13,20 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		http.Error(w, "Failed to parse the request body", http.StatusBadRequest)
+		return
+	}
+
+	if request.CreateServiceTokenRequest1.ApplicationID != "1" ||
+		request.CreateServiceTokenRequest1.Username != "Dias" ||
+		request.CreateServiceTokenRequest1.Password != "111" {
+		fmt.Println("Invalid user")
+		errorMessage, err := h.Error.GenerateErrorResponse("Invalid user name or password.")
+		if err != nil {
+			log.Printf("Error generating error message: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		http.Error(w, errorMessage, http.StatusUnauthorized)
 		return
 	}
 
@@ -28,6 +43,9 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 
 	appId := request.CreateServiceTokenRequest1.ApplicationID
 
+	fmt.Println("Service Token", ServiceToken)
+	fmt.Println("Service ApplicationID", appId)
+
 	response := models.CreateServiceTokenResponse{
 		CreateServiceTokenResponse1: struct {
 			Expiration string `json:"Expiration"`
@@ -39,10 +57,7 @@ func (h *Handlers) CreateServiceTokenHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Trkd-Auth-Token", ServiceToken)
-	w.Header().Set("X-Trkd-Auth-ApplicationID", appId)
 	w.WriteHeader(http.StatusOK)
-
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding response: %v", err)
 	}
@@ -124,8 +139,4 @@ func (h *Handlers) GenerateServiceAndImpersonationToken(w http.ResponseWriter, r
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
-}
-
-func (h *Handlers) CreateImpersonationToken3(w http.ResponseWriter, r *http.Request) {
-
 }
